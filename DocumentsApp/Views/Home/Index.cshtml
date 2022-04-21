@@ -1,0 +1,148 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<nav class="documents-navbar">
+    <input class="menu-btn" type="checkbox" id="menu-btn" />
+    <label class="menu-icon" for="menu-btn">
+        <i class="fa fa-bars"></i>
+    </label>
+    <ul class="menu">
+        <li>
+            <a href="#addFile">
+                <i class="fa fa fa-plus nav-icon"></i> New File
+                <i class="fa fa-angle-down"></i>
+            </a>
+        </li>
+        <li>
+            <a href="#uploadFile">
+                <i class="fa fa-upload nav-icon"></i>
+                Upload
+                <i class="fa fa-angle-down"></i>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fa fa-refresh nav-icon"></i>
+                Sync
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="file-icon fa fa-file-excel-o"></i>
+                Export to Excel
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fa fa-link nav-icon"></i>
+                Flow
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fa fa-ellipsis-h"></i>
+            </a>
+        </li>
+        <li class="user-info">
+            <ul>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li>
+                        <a>Hello @User.Identity.Name!</a>
+                    </li>
+                    <li>
+                        <a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut">Sign out</a>
+                    </li>
+                }
+                else
+                {
+                    <li>
+                        <a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign in</a>
+                    </li>
+                }
+            </ul>
+        </li>
+    </ul>
+
+</nav>
+<section class="documents-container">
+    <h1 class="documents-header">Documents</h1>
+    <div class="table-documents">
+        <table class="documents-table" id="documents">
+            <thead class="documents-table-head">
+                <tr>
+                    <th class="file">
+                        <i class="fa fa-file-o"></i>
+                    </th>
+                    <th>Name <i class="fa fa-angle-down"></i></th>
+                    <th>Modified <i class="fa fa-angle-down"></i></th>
+                    <th>Modified by <i class="fa fa-angle-down"></i></th>
+                    <th>
+                        <i class="fa fa-plus"></i>
+                        Add column
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="documents-table-body" id="data-file">
+                <!-- render data -->
+            </tbody>
+        </table>
+    </div>
+</section>
+<!-- Add File -->
+<div id="addFile" class="overlay">
+    <div class="popup">
+        <h2 class="header-file">File:</h2>
+        <a class="close" href="#">&times;</a>
+        <div class="content" id="form-file">
+            <main>
+                <section id="name">
+                    <input id="file_name"
+                           type="text"
+                           name="File Name"
+                           placeholder="Please Enter File Name" />
+                </section>
+            </main>
+            <button class="button btn-save" id="btn-save">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Details File -->
+<div id="detailsFile" class="overlay">
+    <div class="popup">
+        <h2 class="header-file">File:</h2>
+        <a class="close" href="#">&times;</a>
+        <div class="content" id="form-file">
+            <main>
+                <form id="details-file">
+                    <!-- Data goes here -->
+                </form>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- Upload File -->
+<div id="uploadFile" class="overlay">
+    <div class="popup">
+        <h2 class="header-file">Upload File:</h2>
+        <a class="close" href="#">&times;</a>
+        <div class="content" id="form-file">
+            <main>
+                <form id="update-file">
+                    <section id="name">
+                        <label>Upload File:</label>
+                        <input type="file"
+                               id="upload-file"
+                               multiple /><br /><br />
+                    </section>
+                </form>
+            </main>
+            <button class="button btn-save" id="btn-upload">
+                Upload
+            </button>
+        </div>
+    </div>
+</div>
