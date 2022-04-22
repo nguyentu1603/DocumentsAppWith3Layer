@@ -14,7 +14,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Newtonsoft.Json;
-using System.Text.Json.Serialization;
 
 namespace DocumentsApp
 {
