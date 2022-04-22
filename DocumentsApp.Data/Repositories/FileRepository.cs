@@ -31,5 +31,10 @@ namespace DocumentsApp.Data.Repositories
         {
             return await DeleteAsync(id);
         }
+
+        public async Task<File> UpdateFile(File file)
+        {
+            return await UpdateAsync(file);
+        }
     }
 }

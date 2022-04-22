@@ -13,5 +13,7 @@ namespace DocumentsApp.Services.Services
         Task<File> GetFileByIdAsync(int id);
         Task<File> AddFileAsync(File newFile);
         Task<File> DeleteFileAsync(int id);
+        Task<File> UpdateFileAsync(File file);
+
     }
 }

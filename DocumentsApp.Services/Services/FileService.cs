@@ -36,5 +36,10 @@ namespace DocumentsApp.Services.Services
         {
             return await _fileRepository.GetFiles();
         }
+
+        public async Task<File> UpdateFileAsync(File file)
+        {
+            return await _fileRepository.UpdateFile(file);
+        }
     }
 }

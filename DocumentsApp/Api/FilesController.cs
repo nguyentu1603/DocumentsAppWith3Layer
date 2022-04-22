@@ -58,40 +58,35 @@ namespace DocumentsApp.Api
             return Ok(201);
         }
 
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutFile(int id, File file)
-        //{
-        //    if (id != file.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(file).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!FileExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutFile(int id, File file)
+        {
+            if (id != file.Id)
+            {
+                return BadRequest();
+            }
+            file.ModifiedAt = DateTime.Now;
+            await _fileService.UpdateFileAsync(file);
+            return NoContent();
+        }
 
         public void DeleteFileUpload(string fileName)
         {
             var filePath = Path.Combine(_hostEnvironment.ContentRootPath, "Storages/Uploads", fileName);
             if (System.IO.File.Exists(filePath))
                 System.IO.File.Delete(filePath);
+        }
+
+        public async Task<string> SaveFile(IFormFile uploadFile)
+        {
+            string fileName = new String(Path.GetFileNameWithoutExtension(uploadFile.FileName).Take(10).ToArray()).Replace(' ', '-');
+            fileName = fileName + DateTime.Now.ToString("-yymmssfff") + Path.GetExtension(uploadFile.FileName);
+            var imagePath = Path.Combine(_hostEnvironment.ContentRootPath, "Storages/Uploads", fileName);
+            using (var fileStream = new FileStream(imagePath, FileMode.Create))
+            {
+                await uploadFile.CopyToAsync(fileStream);
+            }
+            return fileName;
         }
 
         ////// DELETE: api/Files/5
@@ -105,7 +100,7 @@ namespace DocumentsApp.Api
             }
             DeleteFileUpload(file.Name);
             await _fileService.DeleteFileAsync(id);
-            return Ok(201);
+            return NoContent();
         }
 
         [HttpPost("UploadFiles")]
@@ -115,17 +110,10 @@ namespace DocumentsApp.Api
             {
                 if (formFile.Length > 0)
                 {
-                    string fileName = new String(Path.GetFileNameWithoutExtension(formFile.FileName).Take(10).ToArray()).Replace(' ', '-');
-                    fileName = fileName + DateTime.Now.ToString("-yymmssfff") + Path.GetExtension(formFile.FileName);
-                    var imagePath = Path.Combine(_hostEnvironment.ContentRootPath, "Storages/Uploads", fileName);
-                    using (var fileStream = new FileStream(imagePath, FileMode.Create))
-                    {
-                        await formFile.CopyToAsync(fileStream);
-                    }
                     // Add new File
                     File newFile = new File();
-                    newFile.Name = fileName;
-                    newFile.Extension = Path.GetExtension(fileName);
+                    newFile.Name = await SaveFile(formFile);
+                    newFile.Extension = Path.GetExtension(newFile.Name);
                     newFile.CreatedBy = User.Identity.Name;
                     newFile.ModifiedBy = User.Identity.Name;
                     await _fileService.AddFileAsync(newFile);
@@ -134,21 +122,34 @@ namespace DocumentsApp.Api
             return StatusCode(201);
         }
 
-        //private bool FileExists(int id)
-        //{
-        //    return _context.Files.Any(e => e.Id == id);
-        //
+        [HttpGet("IsFileUpload/{id}")]
+        public async Task<Boolean> IsFileUpload(int id)
+        {
+            var currentFile = await _fileService.GetFileByIdAsync(id);
+            var filePath = Path.Combine(_hostEnvironment.ContentRootPath, "Storages/Uploads", currentFile.Name);
+            if (System.IO.File.Exists(filePath))
+            {
+                return true;
+            }
+            return false;
+        }
 
-        //[HttpGet("IsFileUpload/{id}")]
-        //public IActionResult IsFileUpload(int id)
-        //{
-        //    var currentFile = _fileRepository.GetFile(id);
-        //    var filePath = Path.Combine(_hostEnvironment.ContentRootPath, "Storages/Uploads", currentFile.Name);
-        //    if (System.IO.File.Exists(filePath))
-        //    {
-        //        return Json(true);
-        //    }
-        //    return Json(false);
-        //}
+
+        [HttpPost("UpdateFile/{id}")]
+        public async Task<IActionResult> UpdateFile(int id, IFormFile uploadFile)
+        {
+            if (uploadFile.Length > 0 && uploadFile != null)
+            {
+                // update File
+                var file = await _fileService.GetFileByIdAsync(id);
+                DeleteFileUpload(file.Name);
+                file.Name = await SaveFile(uploadFile);
+                file.Extension = Path.GetExtension(file.Name);
+                file.ModifiedAt = DateTime.Now;
+                file.ModifiedBy = User.Identity.Name;
+                await _fileService.UpdateFileAsync(file);
+            }
+            return StatusCode(201);
+        }
     }
 }

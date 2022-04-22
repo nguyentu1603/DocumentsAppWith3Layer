@@ -10,5 +10,6 @@ namespace DocumentsApp.Data.Repositories
         Task<File> GetFileById(int id);
         Task<File> AddFile(File File);
         Task<File> DeleteFile(int id);
+        Task<File> UpdateFile(File file);
     }
 }

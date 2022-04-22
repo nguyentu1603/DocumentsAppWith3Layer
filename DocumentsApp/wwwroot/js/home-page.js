@@ -2547,8 +2547,9 @@
                         create: newRecord => _node_modules_axios_index__WEBPACK_IMPORTED_MODULE_0___default.a.post(url, newRecord),
                         update: (id, updatedRecord) => _node_modules_axios_index__WEBPACK_IMPORTED_MODULE_0___default.a.put(url + id, updatedRecord),
                         delete: id => _node_modules_axios_index__WEBPACK_IMPORTED_MODULE_0___default.a.delete(url + id),
-                        checkFileUpload: id => _node_modules_axios_index__WEBPACK_IMPORTED_MODULE_0___default.a.get(url + 'IsFileUpload' + id),
-                        uploadFile: newRecord => _node_modules_axios_index__WEBPACK_IMPORTED_MODULE_0___default.a.post(url + 'UploadFiles', newRecord)
+                        checkFileUpload: id => _node_modules_axios_index__WEBPACK_IMPORTED_MODULE_0___default.a.get(url + 'IsFileUpload/' + id),
+                        uploadFile: newRecord => _node_modules_axios_index__WEBPACK_IMPORTED_MODULE_0___default.a.post(url + 'UploadFiles', newRecord),
+                        updateFile: (id, newRecord) => _node_modules_axios_index__WEBPACK_IMPORTED_MODULE_0___default.a.post(url + `UpdateFile/${id}`, newRecord)
                     };
                 };
 
@@ -2667,21 +2668,46 @@
                     }
                 };
 
-                const updateFile = (id, item) => {
-                    const form = document.getElementById('details-file');
-                    item.name = form.file.value;
-                    console.log(item);
+                const updateFile = async (id, item) => {
+                    const checkIsUploadFile = await IsFileUpload(id);
+                    const formData = new FormData();
+
+                    if (checkIsUploadFile) {
+                        const input = document.getElementById('upload-file');
+                        const file = input.files;
+                        formData.append('uploadFile', file[0]);
+                        documentsAPI().updateFile(id, formData).then(res => {
+                            console.log(res);
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    } else {
+                        const form = document.getElementById('details-file');
+                        item.name = form.file.value;
+                        documentsAPI().update(id, item).then(res => {
+                            console.log(res);
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    }
+
+                    renderDocuments();
+                    showLoadingScreen();
+                };
+
+                const IsFileUpload = async id => {
+                    const resp = await documentsAPI().checkFileUpload(id);
+                    return resp.data;
                 }; //Show File Details
 
 
                 const showDetails = id => {
                     const fileDetails = document.getElementById('details-file');
-                    documentsAPI().findById(id).then(res => {
-                        console.log(res.data);
+                    documentsAPI().findById(id).then(async res => {
                         const renderFile = `
             <section id="name">
               <label>File:</label>
-              <input id="file" type="text" value="${res.data.name}" />
+              ${(await IsFileUpload(id)) ? `<input type="file" id="upload-file" value="${res.data.name}" />` : `<input id="file" type="text" value="${res.data.name}" />`}
               <label>Created At:</label>
               <input id="createdAt" value="${new Date(res.data.createdAt).toLocaleString()}" type="text" disabled />
               <label>Modified At:</label>
